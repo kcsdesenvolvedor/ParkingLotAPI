@@ -6,10 +6,12 @@ using ParkingLotAPI.Sevices.CarService;
 using ParkingLotAPI.Sevices.ParkingService;
 using ParkingLotAPI.Sevices.TicketService;
 using ParkingLotAPI.Sevices.VacancyService;
-using System.Net.Sockets;
 
-namespace ParkingAPI.Controllers
+namespace ParkingLotAPI.Controllers
 {
+    /// <summary>
+    /// Controller para gerenciar operações relacionadas a tickets de estacionamento.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class TicketController : Controller
@@ -18,14 +20,20 @@ namespace ParkingAPI.Controllers
         private readonly ICarService _carService;
         private readonly IVacancyService _vacancyService;
         private readonly IParkingService _parkingService;
-        public TicketController(ITicketService ticketService, ICarService car, IVacancyService vacancyService, IParkingService parkingService)
+
+        public TicketController(ITicketService ticketService, ICarService carService, IVacancyService vacancyService, IParkingService parkingService)
         {
             _ticketService = ticketService;
-            _carService = car;
+            _carService = carService;
             _vacancyService = vacancyService;
             _parkingService = parkingService;
         }
 
+        /// <summary>
+        /// Retorna uma lista de todos os tickets cadastrados.
+        /// </summary>
+        /// <returns>Uma lista de tickets.</returns>
+        /// <response code="200">Retorna a lista de tickets.</response>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Ticket>>> GetTickets()
         {
@@ -34,6 +42,14 @@ namespace ParkingAPI.Controllers
             return Ok(tickets);
         }
 
+        /// <summary>
+        /// Retorna um ticket específico pelo ID.
+        /// </summary>
+        /// <param name="id">O ID do ticket.</param>
+        /// <returns>O ticket correspondente ao ID.</returns>
+        /// <response code="200">Retorna o ticket encontrado.</response>
+        /// <response code="404">Se o ticket não for encontrado.</response>
+        /// <response code="400">Se ocorrer um erro interno.</response>
         [HttpGet("GetTicket/{id}")]
         public async Task<ActionResult<IEnumerable<Ticket>>> GetTicketById(int id)
         {
@@ -54,6 +70,14 @@ namespace ParkingAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Adiciona um novo ticket.
+        /// </summary>
+        /// <param name="model">Os dados do ticket a ser criado.</param>
+        /// <returns>Mensagem de sucesso ou erro.</returns>
+        /// <response code="200">Ticket adicionado com sucesso.</response>
+        /// <response code="404">Se o carro ou a vaga não forem encontrados.</response>
+        /// <response code="400">Se a vaga já estiver ocupada ou ocorrer um erro ao salvar o ticket.</response>
         [HttpPost]
         public async Task<ActionResult> SaveTicket(CreateTicketModel model)
         {
@@ -64,13 +88,13 @@ namespace ParkingAPI.Controllers
                 var parking = await _parkingService.GetParkingByIdAsync(vacancy.ParkingId);
 
                 if (car is null)
-                    return NotFound(new {Message = "Carro não encontrado!"});
+                    return NotFound(new { Message = "Carro não encontrado!" });
 
                 if (vacancy is null)
                     return NotFound(new { Message = "Vaga não encontrada!" });
 
                 if (vacancy.Busy)
-                    return BadRequest(new {Message = "Essa vaga já está ocupada"});
+                    return BadRequest(new { Message = "Essa vaga já está ocupada" });
 
                 var ticket = new Ticket
                 {
@@ -82,12 +106,12 @@ namespace ParkingAPI.Controllers
                 };
                 await _ticketService.AddTicketAsync(ticket);
 
-                // Aterando o status da vaga para ocupado
+                // Alterando o status da vaga para ocupado
                 var vacancyModel = new UpdateVacancyInTicket
                 {
                     Id = vacancy.Id,
                     Number = vacancy.Number,
-                    Busy = false,
+                    Busy = true,
                 };
                 await _vacancyService.UpdateVacancyInTicketAsync(vacancyModel);
 
@@ -99,6 +123,14 @@ namespace ParkingAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Atualiza os dados de um ticket existente.
+        /// </summary>
+        /// <param name="model">Os dados atualizados do ticket.</param>
+        /// <returns>Mensagem de sucesso ou erro.</returns>
+        /// <response code="200">Ticket atualizado com sucesso.</response>
+        /// <response code="404">Se o ticket ou a vaga não forem encontrados.</response>
+        /// <response code="400">Se a vaga já estiver ocupada ou ocorrer um erro ao atualizar o ticket.</response>
         [HttpPut]
         public async Task<ActionResult> UpdateTicket(UpdateTicketModel model)
         {
@@ -143,6 +175,14 @@ namespace ParkingAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Remove um ticket pelo ID.
+        /// </summary>
+        /// <param name="id">O ID do ticket a ser removido.</param>
+        /// <returns>Mensagem de sucesso ou erro.</returns>
+        /// <response code="200">Ticket removido com sucesso.</response>
+        /// <response code="404">Se o ticket não for encontrado.</response>
+        /// <response code="400">Se o ticket ainda não foi processado ou ocorrer um erro ao remover o ticket.</response>
         [HttpDelete]
         public async Task<ActionResult> DeleteTicket(int id)
         {
@@ -150,7 +190,7 @@ namespace ParkingAPI.Controllers
             {
                 var ticket = await _ticketService.GetTicketByIdAsync(id);
                 if (ticket != null && ticket.Status == TicketStatus.Pending)
-                    return BadRequest(new {Message = "Esse ticket ainda não foi processado!"});
+                    return BadRequest(new { Message = "Esse ticket ainda não foi processado!" });
 
                 var isDeletedTicket = await _ticketService.DeleteTicketAsync(id);
                 if (isDeletedTicket)
@@ -165,6 +205,14 @@ namespace ParkingAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Processa um ticket, registrando a saída do veículo e calculando o valor a ser pago.
+        /// </summary>
+        /// <param name="model">Os dados do ticket a ser processado.</param>
+        /// <returns>O ticket processado.</returns>
+        /// <response code="200">Ticket processado com sucesso.</response>
+        /// <response code="404">Se o ticket não for encontrado.</response>
+        /// <response code="400">Se o ticket já foi processado ou ocorrer um erro ao processar o ticket.</response>
         [HttpPost("ProcessedTicket")]
         public async Task<ActionResult> ProcessedTicketAsync(ProcessedTicketModel model)
         {

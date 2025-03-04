@@ -4,20 +4,30 @@ using ParkingLotAPI.Models.Vacancy;
 using ParkingLotAPI.Sevices.ParkingService;
 using ParkingLotAPI.Sevices.VacancyService;
 
-namespace ParkingAPI.Controllers
+namespace ParkingLotAPI.Controllers
 {
+    /// <summary>
+    /// Controller para gerenciar operações relacionadas a vagas de estacionamento.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class VacancyController : Controller
     {
         private readonly IVacancyService _vacancyService;
         private readonly IParkingService _parkingService;
+
         public VacancyController(IVacancyService vacancyService, IParkingService parkingService)
         {
             _vacancyService = vacancyService;
             _parkingService = parkingService;
         }
 
+        /// <summary>
+        /// Retorna uma lista de todas as vagas cadastradas.
+        /// </summary>
+        /// <returns>Uma lista de vagas.</returns>
+        /// <response code="200">Retorna a lista de vagas.</response>
+        /// <response code="400">Se ocorrer um erro interno.</response>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Vacancy>>> GetVacancies()
         {
@@ -32,6 +42,14 @@ namespace ParkingAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Retorna uma vaga específica pelo ID.
+        /// </summary>
+        /// <param name="id">O ID da vaga.</param>
+        /// <returns>A vaga correspondente ao ID.</returns>
+        /// <response code="200">Retorna a vaga encontrada.</response>
+        /// <response code="404">Se a vaga não for encontrada.</response>
+        /// <response code="400">Se ocorrer um erro interno.</response>
         [HttpGet("GetVacancy/{id}")]
         public async Task<ActionResult<Vacancy>> GetVacancyById(int id)
         {
@@ -50,6 +68,13 @@ namespace ParkingAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Adiciona uma nova vaga.
+        /// </summary>
+        /// <param name="model">Os dados da vaga a ser criada.</param>
+        /// <returns>Mensagem de sucesso ou erro.</returns>
+        /// <response code="200">Vaga adicionada com sucesso.</response>
+        /// <response code="400">Se ocorrer um erro ao salvar a vaga.</response>
         [HttpPost]
         public async Task<ActionResult> SaveVacancy(CreateVacancyModel model)
         {
@@ -72,6 +97,14 @@ namespace ParkingAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Atualiza os dados de uma vaga existente.
+        /// </summary>
+        /// <param name="model">Os dados atualizados da vaga.</param>
+        /// <returns>Mensagem de sucesso ou erro.</returns>
+        /// <response code="200">Vaga atualizada com sucesso.</response>
+        /// <response code="404">Se a vaga não for encontrada.</response>
+        /// <response code="400">Se ocorrer um erro ao atualizar a vaga.</response>
         [HttpPut]
         public async Task<ActionResult<Vacancy>> UpdateVacancy(UpdateVacancyModel model)
         {
@@ -80,7 +113,7 @@ namespace ParkingAPI.Controllers
                 var isUpdatedVacancy = await _vacancyService.UpdateVacancyAsync(model);
                 if (isUpdatedVacancy)
                 {
-                    return Ok(new { Message = "Vaga atualizada com sucesso!"});
+                    return Ok(new { Message = "Vaga atualizada com sucesso!" });
                 }
                 return NotFound();
             }
@@ -90,6 +123,14 @@ namespace ParkingAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Remove uma vaga pelo ID.
+        /// </summary>
+        /// <param name="id">O ID da vaga a ser removida.</param>
+        /// <returns>Mensagem de sucesso ou erro.</returns>
+        /// <response code="200">Vaga removida com sucesso.</response>
+        /// <response code="404">Se a vaga não for encontrada.</response>
+        /// <response code="400">Se ocorrer um erro ao remover a vaga.</response>
         [HttpDelete]
         public async Task<ActionResult> DeleteVacancy(int id)
         {
@@ -98,7 +139,7 @@ namespace ParkingAPI.Controllers
                 var isDeletedVacancy = await _vacancyService.DeleteVacancyAsync(id);
                 if (isDeletedVacancy)
                 {
-                    return Ok(new { Message = "Vaga deletado com sucesso!" });
+                    return Ok(new { Message = "Vaga deletada com sucesso!" });
                 }
                 return NotFound();
             }

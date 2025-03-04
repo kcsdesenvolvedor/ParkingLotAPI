@@ -7,6 +7,8 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <UserSecretsId>59321ae9-9564-4dd9-88fc-57649469c6d4</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

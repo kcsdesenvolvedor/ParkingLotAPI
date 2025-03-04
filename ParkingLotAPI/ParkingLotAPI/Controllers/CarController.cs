@@ -5,6 +5,9 @@ using ParkingLotAPI.Sevices.CarService;
 
 namespace ParkingLotAPI.Controllers
 {
+    /// <summary>
+    /// Controller para gerenciar operações relacionadas a carros.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class CarController : Controller
@@ -15,6 +18,11 @@ namespace ParkingLotAPI.Controllers
             _carService = carService;
         }
 
+        /// <summary>
+        /// Retorna uma lista de todos os carros cadastrados.
+        /// </summary>
+        /// <returns>Uma lista de carros.</returns>
+        /// <response code="200">Retorna a lista de carros.</response>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Car>>> GetCars()
         {
@@ -22,6 +30,13 @@ namespace ParkingLotAPI.Controllers
             return Ok(cars);
         }
 
+        /// <summary>
+        /// Retorna um carro específico pelo ID.
+        /// </summary>
+        /// <param name="id">O ID do carro.</param>
+        /// <returns>O carro correspondente ao ID.</returns>
+        /// <response code="200">Retorna o carro encontrado.</response>
+        /// <response code="404">Se o carro não for encontrado.</response>
         [HttpGet("GetCar/{id}")]
         public async Task<ActionResult<IEnumerable<Car>>> GetCarById(int id)
         {
@@ -39,6 +54,13 @@ namespace ParkingLotAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Adiciona um novo carro.
+        /// </summary>
+        /// <param name="model">Os dados do carro a ser criado.</param>
+        /// <returns>Mensagem de sucesso ou erro.</returns>
+        /// <response code="200">Carro adicionado com sucesso.</response>
+        /// <response code="400">Se a placa do carro já estiver cadastrada ou ocorrer um erro.</response>
         [HttpPost]
         public async Task<ActionResult> SaveCar(CreateCarModel model)
         {
@@ -64,10 +86,18 @@ namespace ParkingLotAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new {Message = "Erro ao salvar o carro", Error = ex.Message});
+                return BadRequest(new { Message = "Erro ao salvar o carro", Error = ex.Message });
             }
         }
 
+        /// <summary>
+        /// Atualiza os dados de um carro existente.
+        /// </summary>
+        /// <param name="model">Os dados atualizados do carro.</param>
+        /// <returns>Mensagem de sucesso ou erro.</returns>
+        /// <response code="200">Carro atualizado com sucesso.</response>
+        /// <response code="404">Se o carro não for encontrado.</response>
+        /// <response code="400">Se ocorrer um erro ao atualizar o carro.</response>
         [HttpPut]
         public async Task<ActionResult> UpdateCar(UpdateCarModel model)
         {
@@ -95,6 +125,14 @@ namespace ParkingLotAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Remove um carro pelo ID.
+        /// </summary>
+        /// <param name="id">O ID do carro a ser removido.</param>
+        /// <returns>Mensagem de sucesso ou erro.</returns>
+        /// <response code="200">Carro removido com sucesso.</response>
+        /// <response code="404">Se o carro não for encontrado.</response>
+        /// <response code="400">Se ocorrer um erro ao remover o carro.</response>
         [HttpDelete]
         public async Task<ActionResult> DeleteCar(int id)
         {
@@ -109,7 +147,7 @@ namespace ParkingLotAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new {Message = $"Erro ao tentar remover carro id = {id}", Error = ex.Message});
+                return BadRequest(new { Message = $"Erro ao tentar remover carro id = {id}", Error = ex.Message });
             }
         }
     }
